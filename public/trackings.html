@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Tracking Data</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        select {
+            padding: 2px;
+        }
+
+        .errors {
+            color: red;
+        }
+
+        .flexed {
+            display: flex;
+            flex-direction: row;
+            margin-bottom: .5%;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            margin-right: .5%;
+        }
+
+        .submit-btn {
+            height: fit-content;
+            margin-right: .5%;
+        }
+
+    </style>
+</head>
+<body>
+<h1>Tracking Data</h1>
+
+<form id="formFilters" method="POST" class="flexed">
+    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+    <div class="field">
+        <div>
+            <label for="start_date">Start Date:</label>
+            <input id="start_date" name="start_date" type="datetime-local" value="<?php echo htmlspecialchars($startDate ?? $_SESSION['filters']['startDate'] ?? ''); ?>">
+        </div>
+        <?php if (!empty($trackings['error']) && $trackings['field'] === 'start_date'): ?>
+        <span class="errors"> <?php echo htmlspecialchars($trackings['error']); ?> </span>
+        <?php endif; ?>
+    </div>
+    <div class="field">
+        <div>
+            <label for="end_date">End Date:</label>
+            <input id="end_date" name="end_date" type="datetime-local" value="<?php echo htmlspecialchars($endDate ?? $_SESSION['filters']['endDate'] ?? ''); ?>">
+        </div>
+        <?php if (!empty($trackings['error']) && $trackings['field'] === 'end_date'): ?>
+        <span class="errors"> <?php echo htmlspecialchars($trackings['error']); ?> </span>
+        <?php endif; ?>
+    </div>
+    <div class="field">
+        <label for="client"></label>
+        <select size='1' name='client' id="client">
+            <option value=''>All</option>
+            <?php foreach ($filters['clients'] as $client): ?>
+                <option <?php if(!empty($_SESSION['filters']['client']) && $_SESSION['filters']['client'] == $client['id']) echo 'selected'; ?> value='<?php echo $client["id"]; ?>'>
+                    <?php echo $client['name'] ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+        <?php if (!empty($trackings['error']) && $trackings['field'] === 'client'): ?>
+        <span class="errors"> <?php echo htmlspecialchars($trackings['error']); ?> </span>
+        <?php endif; ?>
+    </div>
+    <button class="submit-btn" type="submit">Filter</button>
+    <button id="btnReset" class="submit-btn" type="button" onclick="window.location.href = window.location.pathname">Reset</button>
+    <div class="field">
+        <span>Total results: <?php echo $count; ?></span>
+    </div>
+</form>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Client Name</th>
+        <th>Page URL</th>
+        <th>Tracked Id</th>
+        <th>Access Date Time</th>
+    </tr>
+    </thead>
+    <tbody>
+    <?php if (empty($trackings) || !empty($trackings['error'])): ?>
+    <tr>
+        <td colspan="5">No data found.</td>
+    </tr>
+    <?php else: ?>
+    <?php foreach ($trackings as $tracking): ?>
+    <tr>
+        <td><?php echo htmlspecialchars($tracking['id']); ?></td>
+        <td><?php echo htmlspecialchars($tracking['client_name']); ?></td>
+        <td><?php echo htmlspecialchars($tracking['url']); ?></td>
+        <td><?php echo htmlspecialchars($tracking['tracked_id']); ?></td>
+        <td><?php echo htmlspecialchars($tracking['created_at']); ?></td>
+    </tr>
+    <?php endforeach; ?>
+    <?php endif; ?>
+    </tbody>
+</table>
+</body>
+</html>
